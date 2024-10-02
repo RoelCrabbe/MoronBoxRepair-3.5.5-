@@ -24,7 +24,6 @@ MBR:RegisterEvent("MERCHANT_SHOW")
 function MBR:OnEvent(event)
     if event == "ADDON_LOADED" and arg1 == MBR:GetName() then
         SetupSavedVariables()
-        MBR:CreateWindows()
     elseif event == "MERCHANT_SHOW" then
         MBR_SellGreyItems()
         MBR_RepairItems()
