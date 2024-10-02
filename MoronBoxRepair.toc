@@ -1,0 +1,10 @@
+## Interface: 30300
+## Title: MoronBoxRepair by |cff00ccffMoRoN|r
+## Author: MoRoN
+## LoadOnDemand: 0
+## Dependencies: MoronBoxCore
+## Notes: |cff00ccffMoronBoxRepair|r is a lightweight bag cleaner addon that will also auto repair gear if needed, optimized for Multiboxing.
+## SavedVariablesPerCharacter: MoronBoxRepair_Settings
+
+Core\Main.lua
+Interface\Display.lua
