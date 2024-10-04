@@ -9,9 +9,9 @@ MBR = CreateFrame("Frame", "MoronBoxRepair", UIParent)
 -------------------------------------------------------------------------------
 
 MBR.DefaultOptions = {
+    AutoOpenVendor = true,
     AutoRepair = true,
-    AutoSellGrey = true,
-    SellThreshold = 10000
+    AutoSellGrey = true
 }
 
 -------------------------------------------------------------------------------
@@ -20,6 +20,7 @@ MBR.DefaultOptions = {
 
 MBR:RegisterEvent("ADDON_LOADED")
 MBR:RegisterEvent("MERCHANT_SHOW")
+MBR:RegisterEvent("GOSSIP_SHOW")
 
 function MBR:OnEvent(event)
     if event == "ADDON_LOADED" and arg1 == MBR:GetName() then
@@ -27,6 +28,19 @@ function MBR:OnEvent(event)
     elseif event == "MERCHANT_SHOW" then
         MBR_SellGreyItems()
         MBR_RepairItems()
+    elseif event == "GOSSIP_SHOW" then
+        if MoronBoxRepair_Settings.AutoOpenVendor then
+            for i = 1, GetNumGossipOptions() do
+                local GossipText, GossipType = GetGossipOptions(i)
+
+                if GossipType == "vendor" or GossipType == "banker" or 
+                    (GossipText and (GossipText:find("I want to browse") or GossipText:find("I would like to check"))) then
+                    SelectGossipOption(i)
+                    MBC:Print("Opening "..CapitalizeFirstLetter(GossipType).."!")
+                    break
+                end
+            end
+        end
     end
 end
 

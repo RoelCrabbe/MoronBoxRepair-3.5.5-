@@ -2,51 +2,24 @@
 -- General Setting Window {{{
 -------------------------------------------------------------------------------
 
-function MBC:CreateLine(Parent, Width, Height, OffsetX, OffsetY, Color)
-    local Line = Parent:CreateTexture(nil, "ARTWORK")
-    Line:SetSize(Width, Height)  -- Set width and height of the line
-
-    -- Position the line centered around the parent frame, with specified offsets
-    Line:SetPoint("CENTER", Parent, "CENTER", OffsetX, OffsetY)
-
-    Line:SetTexture(1, 1, 1, 1)  -- Set a default white texture
-    Line:SetVertexColor(unpack(Color))  -- Set the color (RGBA format)
-    
-    return Line
-end
-
-
 function MBR:GeneralSettingWindow()
     
-    local SettingsFrame = MBC:CreateFrame(UIParent, MBC.BACKDROPS.Basic, 500, 600)
-    SettingsFrame:SetBackdropColor(unpack(MBC.COLORS.FrameBackground))
-
-    local Title = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    Title:SetText(MBC:ApplyTextColor("Moron Box Repair", MBC.COLORS.Title))
-    Title:SetPoint("TOP", SettingsFrame, "TOP", 0, -10)
-    SettingsFrame.Title = Title
-    MBC:ApplyCustomFont(Title, 30)
-
-    local ReturnButton = MBC:ReturnButton(SettingsFrame, 20, 20)
-    SettingsFrame.ReturnButton = ReturnButton
-
-    ReturnButton:SetScript("OnClick", function()
-        
+    local SettingsFrame = MBC:CreateGeneralWindow(UIParent, "Moron Box Repair", 500, 400)
+    SettingsFrame.ReturnButton:SetScript("OnClick", function()
+        SettingsFrame:Hide()
+        MBC:CreateSettingsWindow()
     end)
 
-    local CloseButton = MBC:CloseButton(SettingsFrame, 20, 20)
-    SettingsFrame.CloseButton = CloseButton
-
-    CloseButton:SetScript("OnClick", function()
+    SettingsFrame.CloseButton:SetScript("OnClick", function()
         SettingsFrame:Hide()
     end)
 
     local Description = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     Description:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 20, -60)
-    Description:SetWidth(SettingsFrame:GetWidth() - 40)  -- Subtract padding
+    Description:SetWidth(SettingsFrame:GetWidth() - 40)
     Description:SetJustifyH("LEFT")
-    Description:SetHeight(0)  -- Auto-adjust height based on content
-    Description:SetWordWrap(true)  -- Enable word wrapping
+    Description:SetHeight(0)
+    Description:SetWordWrap(true)
     Description:SetText(
         MBC:ApplyTextColor("MoronBoxRepair", MBC.COLORS.Highlight) ..
         MBC:ApplyTextColor(" is a lightweight bag cleaner addon that automatically repairs gear when needed.", MBC.COLORS.Text)
@@ -55,59 +28,47 @@ function MBR:GeneralSettingWindow()
     SettingsFrame.Description = Description
     MBC:ApplyCustomFont(Description, 15)
 
+    local FrameHeight = SettingsFrame:GetHeight()
     local LineWidth = SettingsFrame:GetWidth() - 60
-    local OffsetY = (SettingsFrame:GetHeight() / 2) - 105
-
+    local OffsetY = FrameHeight * 0.5 - 105
+    
     MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.COLORS.LineColor)
 
+    local AutoOpenVendorCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoOpenVendor)
+    AutoOpenVendorCheckbox:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 45, -120)
 
+    local AutoOpenVendorLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    AutoOpenVendorLabel:SetPoint("LEFT", AutoOpenVendorCheckbox, "RIGHT", 15, 0)  
+    AutoOpenVendorLabel:SetText(MBC:ApplyTextColor("Enable Auto Open Vendor", MBC.COLORS.Text))  
+    MBC:ApplyCustomFont(AutoOpenVendorLabel, 14)
 
+    AutoOpenVendorCheckbox:SetScript("OnClick", function(self)
+        MoronBoxRepair_Settings.AutoOpenVendor = (self:GetChecked() == 1)  
+    end)
 
+    local AutoRepairCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoRepair)
+    AutoRepairCheckbox:SetPoint("TOPLEFT", AutoOpenVendorCheckbox, "BOTTOMLEFT", 0, -15)
 
+    local AutoRepairLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    AutoRepairLabel:SetPoint("LEFT", AutoRepairCheckbox, "RIGHT", 15, 0) 
+    AutoRepairLabel:SetText(MBC:ApplyTextColor("Enable Auto Repair", MBC.COLORS.Text))  
+    MBC:ApplyCustomFont(AutoRepairLabel, 14)
 
+    AutoRepairCheckbox:SetScript("OnClick", function(self)
+        MoronBoxRepair_Settings.AutoRepair = (self:GetChecked() == 1)  
+    end)
 
+    local AutoSellGreyCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoSellGrey)
+    AutoSellGreyCheckbox:SetPoint("TOPLEFT", AutoRepairCheckbox, "BOTTOMLEFT", 0, -15)
 
+    local AutoSellGreyLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    AutoSellGreyLabel:SetPoint("LEFT", AutoSellGreyCheckbox, "RIGHT", 15, 0)  
+    AutoSellGreyLabel:SetText(MBC:ApplyTextColor("Enable Auto Sell Grey Items", MBC.COLORS.Text))  
+    MBC:ApplyCustomFont(AutoSellGreyLabel, 14)
 
-
-
-
-
-
-    MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, -(OffsetY + 64), MBC.COLORS.LineColor)
-    MBC:CreateAddonGroupText(SettingsFrame)
-
-    MBC:MakeMoveable(SettingsFrame)
+    AutoSellGreyCheckbox:SetScript("OnClick", function(self)
+        MoronBoxRepair_Settings.AutoSellGrey = (self:GetChecked() == 1) 
+    end)
     
     return SettingsFrame
 end
-
--- function MerchantFrame:CreateRepairButton()
---     self.AutoRepairButton, UpdateRepairButtonAppearance = MBC:CreateToggleButton(self, "Auto Repair", MoronBoxRepair_Settings.AutoRepair, 125)
---     self.AutoRepairButton:SetPoint("CENTER", self, "TOP", -50, -53)
-
---     self.AutoRepairButton:SetScript("OnClick", function()
---         MoronBoxRepair_Settings.AutoRepair = not MoronBoxRepair_Settings.AutoRepair
---         UpdateRepairButtonAppearance(MoronBoxRepair_Settings.AutoRepair)
---         MBR_RepairItems()
---     end)
--- end
-
--- function MerchantFrame:CreateSellButton()
---     self.AutoSellGreyButton, UpdateSellButtonAppearance = MBC:CreateToggleButton(self, "Auto SellGray", MoronBoxRepair_Settings.AutoSellGrey, 125)
---     self.AutoSellGreyButton:SetPoint("CENTER", self, "TOP", 85, -53)
-
---     self.AutoSellGreyButton:SetScript("OnClick", function()
---         MoronBoxRepair_Settings.AutoSellGrey = not MoronBoxRepair_Settings.AutoSellGrey
---         UpdateSellButtonAppearance(MoronBoxRepair_Settings.AutoSellGrey)
---         MBR_SellGreyItems()
---     end)
--- end
-
--- Description:SetText(
---     MBC:ApplyTextColor("MoronBoxRepair", MBC:COLORS.Highlight) ..
---     MBC:ApplyTextColor(" is a lightweight bag cleaner addon that automatically repairs gear when needed.", MBC:COLORS.Text) .. 
---     "\n" .. 
---     MBC:ApplyTextColor("This addon is part of the ", MBC:COLORS.Text) ..
---     MBC:ApplyTextColor("MoronBox", MBC:COLORS.Highlight) ..
---     MBC:ApplyTextColor(" addon group, designed for efficient multiboxing.", MBC:COLORS.Text)
--- )
