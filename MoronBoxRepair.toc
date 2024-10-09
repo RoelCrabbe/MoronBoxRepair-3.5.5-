@@ -7,4 +7,5 @@
 ## SavedVariablesPerCharacter: MoronBoxRepair_Settings
 
 Core\Main.lua
+Core\Utility.lua
 Interface\Display.lua

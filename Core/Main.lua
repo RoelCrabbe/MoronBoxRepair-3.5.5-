@@ -8,10 +8,20 @@ MBR = CreateFrame("Frame", "MoronBoxRepair", UIParent)
 -- The Stored Variables {{{
 -------------------------------------------------------------------------------
 
-MBR.DefaultOptions = {
+MBR.DefaultOptions = { -- Saved Variables default settings, ours are called MoronBoxRepair_Settings
     AutoOpenVendor = true,
     AutoRepair = true,
-    AutoSellGrey = true
+    AutoSellGrey = true,
+    AllowedVendorItems = {}, -- Here the items that CAN be vendored.
+    BlackListedVendorItems = {} -- There are the items that can't
+}
+
+-------------------------------------------------------------------------------
+-- Local Variables {{{
+-------------------------------------------------------------------------------
+
+MBR.Session = {
+    PossibleVendorItems = {} -- These are the items that are local and not stored
 }
 
 -------------------------------------------------------------------------------
@@ -20,33 +30,26 @@ MBR.DefaultOptions = {
 
 MBR:RegisterEvent("ADDON_LOADED")
 MBR:RegisterEvent("MERCHANT_SHOW")
+MBR:RegisterEvent("MERCHANT_CLOSE")
 MBR:RegisterEvent("GOSSIP_SHOW")
+MBR:RegisterEvent("GOSSIP_CLOSED")
 
 function MBR:OnEvent(event)
     if event == "ADDON_LOADED" and arg1 == MBR:GetName() then
-        SetupSavedVariables()
+        MBR:SetupSavedVariables()
     elseif event == "MERCHANT_SHOW" then
-        MBR_SellGreyItems()
-        MBR_RepairItems()
+        MBR:SellGreyItems()
+        MBR:RepairItems()
+    elseif event == "MERCHANT_CLOSE" or event == "GOSSIP_CLOSED" then
+        MBR.Session.PossibleVendorItems = {}        
     elseif event == "GOSSIP_SHOW" then
-        if MoronBoxRepair_Settings.AutoOpenVendor then
-            for i = 1, GetNumGossipOptions() do
-                local GossipText, GossipType = GetGossipOptions(i)
-
-                if GossipType == "vendor" or GossipType == "banker" or 
-                    (GossipText and (GossipText:find("I want to browse") or GossipText:find("I would like to check"))) then
-                    SelectGossipOption(i)
-                    MBC:Print("Opening "..CapitalizeFirstLetter(GossipType).."!")
-                    break
-                end
-            end
-        end
+        MBR:OpenVendorOrBank()
     end
 end
 
 MBR:SetScript("OnEvent", MBR.OnEvent)
 
-function SetupSavedVariables()
+function MBR:SetupSavedVariables()
     if not MoronBoxRepair_Settings then
         MoronBoxRepair_Settings = {}
     end
@@ -62,7 +65,7 @@ end
 -- Core Action Code {{{
 -------------------------------------------------------------------------------
 
-function MBR_RepairItems()
+function MBR:RepairItems()
 
     if not MoronBoxRepair_Settings.AutoRepair or CanMerchantRepair() ~= 1 then 
         return 
@@ -73,15 +76,15 @@ function MBR_RepairItems()
     if repairAllCost > 0 then
         if canRepair == 1 then
             RepairAllItems()
-            Print("Your items have been repaired for: "..GetCoinTextureString(repairAllCost))
+            MBC:Print("Your items have been repaired for: "..GetCoinTextureString(repairAllCost))
             return
         end
 
-        Print("You don't have enough money for repairs!")
+        MBC:Print("You don't have enough money for repairs!")
     end
 end
 
-function MBR_SellGreyItems()
+function MBR:SellGreyItems()
 
     if not MoronBoxRepair_Settings.AutoSellGrey then 
         return 
@@ -93,23 +96,83 @@ function MBR_SellGreyItems()
         for y = 1, GetContainerNumSlots(i) do
             local currentItemLink = GetContainerItemLink(i, y)
 
-            if ( currentItemLink ) then
-                local _, _, itemRarity, _, _, _, _, _, _, _, itemSellPrice = GetItemInfo(currentItemLink)
+            if currentItemLink then
+                -- Get item info
+                local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(currentItemLink)
                 local _, itemCount = GetContainerItemInfo(i, y)
 
-                if ( itemRarity == 0 and itemSellPrice ~= 0 ) then
-                    totalPrice = totalPrice + (itemSellPrice * itemCount)
-                    amountSold = amountSold + itemCount
-                    itemsSold = itemsSold + 1
+                -- Identify items to skip
+                local isGreyItem = itemRarity == 0
+                local isWhiteItem = itemRarity == 1
+                local isTradeGoods = itemType == "Trade Goods"
+                local isConsumable = itemType == "Consumable"
+                local isQuestItem = itemType == "Quest"
+                local isHearthStone =  itemName == "Hearthstone"
+                local isPotion = isConsumable and itemSubType == "Potion"
+                local isHerb = isTradeGoods and itemSubType == "Herb"
+                local isLeather = isTradeGoods and itemSubType == "Leather"
+                local isCloth = isTradeGoods and itemSubType == "Cloth"
+                local isFood = isConsumable and (itemSubType == "Food" or itemSubType == "Drink" or itemSubType == "Food & Drink")
+                local isSpecialWeapon = itemType == "Weapon" and itemSubType == "Miscellaneous"
 
-                    Print("Sold: "..currentItemLink.." (x"..itemCount..") for "..GetCoinTextureString(itemSellPrice * itemCount))
-                    UseContainerItem(i, y)
+                -- Skip items that should not be sold
+                if not (isQuestItem or isHearthStone or isPotion or isHerb or isLeather or isCloth or isFood or isSpecialWeapon) then
+
+                    -- Sell gray items
+                    if isGreyItem and itemSellPrice > 0 then
+
+                        totalPrice = totalPrice + (itemSellPrice * itemCount)
+                        amountSold = amountSold + itemCount
+                        itemsSold = itemsSold + 1
+                        UseContainerItem(i, y)
+
+                        MBC:Print("Sold: "..currentItemLink.." (x"..itemCount..") for "..GetCoinTextureString(itemSellPrice * itemCount))
+
+                    elseif isWhiteItem then
+
+                        if MBR:ItemExistsInAllowed({ Link = itemLink }) then
+
+                            totalPrice = totalPrice + (itemSellPrice * itemCount)
+                            amountSold = amountSold + itemCount
+                            itemsSold = itemsSold + 1
+                            UseContainerItem(i, y)
+    
+                            MBC:Print("Sold: "..currentItemLink.." (x"..itemCount..") for "..GetCoinTextureString(itemSellPrice * itemCount))    
+                        
+                        elseif not MBR:ItemIsBlacklist({ Link = itemLink }) and not MBR:ItemExistsInAllowed({ Link = itemLink }) then
+  
+                            table.insert(MBR.Session.PossibleVendorItems, {
+                                Name = itemName,
+                                Link = itemLink,
+                                Icon = itemTexture
+                            })
+                        end
+                    end
                 end
             end
         end
     end
 
-    if itemsSold > 1 then
-        Print("Total items sold: "..itemsSold.." ("..amountSold.." in total) for a combined price of "..GetCoinTextureString(totalPrice))
+    if #MBR.Session.PossibleVendorItems > 0 then
+        MBR:CreateSellPopup()
+    end
+
+    if itemsSold > 0 then
+        MBC:Print("Total items sold: " .. itemsSold .. " (" .. amountSold .. " in total) for a combined price of " .. GetCoinTextureString(totalPrice))
+    end
+end
+
+function MBR:OpenVendorOrBank()
+    if MoronBoxRepair_Settings.AutoOpenVendor then
+        for i = 1, GetNumGossipOptions() do
+            local GossipText, GossipType = GetGossipOptions(i)
+
+            if GossipType == "vendor" or GossipType == "banker" or 
+                (GossipText and (GossipText:find("I want to browse") or GossipText:find("I would like to check"))) then
+                SelectGossipOption(i)
+                MBC:Print("Opening "..CapitalizeFirstLetter(GossipType).."!")
+                break
+            end
+        end
     end
 end
