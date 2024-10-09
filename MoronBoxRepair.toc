@@ -8,4 +8,6 @@
 
 Core\Main.lua
 Core\Utility.lua
+
+Interface\Actions.lua
 Interface\Display.lua

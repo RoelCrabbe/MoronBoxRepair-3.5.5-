@@ -86,25 +86,17 @@ function MBR:CreatePopOpenFrame(Parent)
     Parent.PopOpenFrame = PopOpenFrame
 
     local Description = PopOpenFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    Description:SetPoint("CENTER", PopOpenFrame, "CENTER", 0, 45)
+    Description:SetPoint("CENTER", PopOpenFrame, "CENTER", 0, 0)
     Description:SetWidth(PopOpenFrame:GetWidth() - 40)
     Description:SetJustifyH("LEFT")
     Description:SetJustifyV("MIDDLE")
     Description:SetWordWrap(true)
+
     Description:SetText(
         MBC:ApplyTextColor("These items haven't been sold before. Review them carefully and choose which ones should be auto-sold in the future.\n", MBC.COLORS.Text) ..
         MBC:ApplyTextColor("Your selections will be saved, and those items will ", MBC.COLORS.Text) ..
         MBC:ApplyTextColor("always", MBC.COLORS.Highlight) ..
-        MBC:ApplyTextColor(" be kept from auto-selling.", MBC.COLORS.Text)
-    )
-
-    local DescriptionTwo = PopOpenFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    DescriptionTwo:SetPoint("CENTER", PopOpenFrame, "CENTER", 0, -15)
-    DescriptionTwo:SetWidth(PopOpenFrame:GetWidth() - 40)
-    DescriptionTwo:SetJustifyH("LEFT")
-    DescriptionTwo:SetJustifyV("MIDDLE")
-    DescriptionTwo:SetWordWrap(true)
-    DescriptionTwo:SetText(
+        MBC:ApplyTextColor(" be kept from auto-selling.\n\n", MBC.COLORS.Text) ..
         MBC:ApplyTextColor("Certain items, like ", MBC.COLORS.Text) ..
         MBC:ApplyTextColor("cloth", MBC.COLORS.Highlight) .. 
         MBC:ApplyTextColor(", ", MBC.COLORS.Text) ..
@@ -113,25 +105,14 @@ function MBR:CreatePopOpenFrame(Parent)
         MBC:ApplyTextColor("potions", MBC.COLORS.Highlight) ..
         MBC:ApplyTextColor(", and ", MBC.COLORS.Text) ..
         MBC:ApplyTextColor("quest items", MBC.COLORS.Highlight) ..
-        MBC:ApplyTextColor(", will always be excluded from auto-selling.", MBC.COLORS.Text)
-    )
-
-    local DescriptionThree = PopOpenFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    DescriptionThree:SetPoint("CENTER", PopOpenFrame, "CENTER", 0, -60)
-    DescriptionThree:SetWidth(PopOpenFrame:GetWidth() - 40)
-    DescriptionThree:SetJustifyH("LEFT")
-    DescriptionThree:SetJustifyV("MIDDLE")
-    DescriptionThree:SetWordWrap(true)
-    DescriptionThree:SetText(
+        MBC:ApplyTextColor(", will always be excluded from auto-selling.\n\n", MBC.COLORS.Text) ..
         "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\RedMinus.tga:22:22:0:0:64:64:4:60:4:60|t" .. 
         MBC:ApplyTextColor(" : Auto Vendor     ", MBC.COLORS.Text) ..
         "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\GreenPlus.tga:22:22:0:0:64:64:4:60:4:60|t" ..
         MBC:ApplyTextColor(" : Never Vendor", MBC.COLORS.Text)
     )
-    
+
     MBC:ApplyCustomFont(Description, 15)
-    MBC:ApplyCustomFont(DescriptionTwo, 15)
-    MBC:ApplyCustomFont(DescriptionThree, 15)
     PopOpenFrame:Hide()
 
     function PopOpenFrame:UpdatePoints()
@@ -141,6 +122,7 @@ function MBR:CreatePopOpenFrame(Parent)
 
     return PopOpenFrame
 end
+
 
 function MBR:CreateSellPopup()
 
