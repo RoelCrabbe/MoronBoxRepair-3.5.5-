@@ -43,3 +43,12 @@ function MBR:ItemExistsInAllowed(Item)
     end
     return false
 end
+
+function MBR:ItemExistsInPossibleVendorItems(item)
+    for _, vendorItem in ipairs(MBR.Session.PossibleVendorItems) do
+        if vendorItem.Link == item.Link then
+            return true
+        end
+    end
+    return false
+end

@@ -5,14 +5,8 @@
 function MBR:GeneralSettingWindow()
     
     local SettingsFrame = MBC:CreateGeneralWindow(UIParent, "Moron Box Repair", 500, 400)
-    SettingsFrame.ReturnButton:SetScript("OnClick", function()
-        SettingsFrame:Hide()
-        MBC:CreateSettingsWindow()
-    end)
-
-    SettingsFrame.CloseButton:SetScript("OnClick", function()
-        SettingsFrame:Hide()
-    end)
+    local FrameHeight = SettingsFrame:GetHeight()
+    local LineWidth = SettingsFrame:GetWidth() - 60
 
     local Description = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     Description:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 20, -60)
@@ -21,19 +15,14 @@ function MBR:GeneralSettingWindow()
     Description:SetHeight(0)
     Description:SetWordWrap(true)
     Description:SetText(
-        MBC:ApplyTextColor("MoronBoxRepair", MBC.COLORS.Highlight) ..
+        MBC:ApplyTextColor("MoronBoxRepair", MBC.COLORS.Highlight)..
         MBC:ApplyTextColor(" is a lightweight bag cleaner addon that automatically repairs gear when needed.", MBC.COLORS.Text)
     )
 
-    SettingsFrame.Description = Description
-    MBC:ApplyCustomFont(Description, 15)
-
-    local FrameHeight = SettingsFrame:GetHeight()
-    local LineWidth = SettingsFrame:GetWidth() - 60
     local OffsetY = FrameHeight * 0.5 - 105
-    
     MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.COLORS.LineColor)
 
+    -- Auto Open Banks / Vendors
     local AutoOpenVendorCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoOpenVendor)
     AutoOpenVendorCheckbox:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 45, -120)
 
@@ -46,6 +35,7 @@ function MBR:GeneralSettingWindow()
         MoronBoxRepair_Settings.AutoOpenVendor = (self:GetChecked() == 1)  
     end)
 
+    -- Auto Repair Items
     local AutoRepairCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoRepair)
     AutoRepairCheckbox:SetPoint("TOPLEFT", AutoOpenVendorCheckbox, "BOTTOMLEFT", 0, -15)
 
@@ -58,6 +48,7 @@ function MBR:GeneralSettingWindow()
         MoronBoxRepair_Settings.AutoRepair = (self:GetChecked() == 1)  
     end)
 
+    -- Auto Sell Gray / Whites
     local AutoSellGreyCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoSellGrey)
     AutoSellGreyCheckbox:SetPoint("TOPLEFT", AutoRepairCheckbox, "BOTTOMLEFT", 0, -15)
 
@@ -69,7 +60,23 @@ function MBR:GeneralSettingWindow()
     AutoSellGreyCheckbox:SetScript("OnClick", function(self)
         MoronBoxRepair_Settings.AutoSellGrey = (self:GetChecked() == 1) 
     end)
-    
+
+    SettingsFrame.ReturnButton:SetScript("OnClick", function()
+        SettingsFrame:Hide()
+        MBC:CreateSettingsWindow()
+    end)
+
+    SettingsFrame.CloseButton:SetScript("OnClick", function()
+        SettingsFrame:Hide()
+    end)
+
+    MBC:ApplyCustomFont(Description, 15)
+
+    SettingsFrame.Description = Description
+    SettingsFrame.AutoOpenVendorCheckbox = AutoOpenVendorCheckbox
+    SettingsFrame.AutoRepairCheckbox = AutoRepairCheckbox
+    SettingsFrame.AutoSellGreyCheckbox = AutoSellGreyCheckbox
+
     return SettingsFrame
 end
 
@@ -80,7 +87,7 @@ end
 function MBR:CreatePopOpenFrame(Parent)
     if not Parent then return end
 
-    local PopOpenFrame = MBC:CreateFrame(Parent, MBC.BACKDROPS.Basic, Parent:GetWidth(), 200)
+    local PopOpenFrame = MBC:CreateFrame(Parent, MBC.BACKDROPS.Basic, Parent:GetWidth(), 190)
     PopOpenFrame:SetBackdropColor(unpack(MBC.COLORS.FrameBackground))
     PopOpenFrame:SetPoint("BOTTOM", Parent, "TOP", 0, 0)
     Parent.PopOpenFrame = PopOpenFrame
@@ -91,44 +98,47 @@ function MBR:CreatePopOpenFrame(Parent)
     Description:SetJustifyH("LEFT")
     Description:SetJustifyV("MIDDLE")
     Description:SetWordWrap(true)
-
     Description:SetText(
-        MBC:ApplyTextColor("These items haven't been sold before. Review them carefully and choose which ones should be auto-sold in the future.\n", MBC.COLORS.Text) ..
-        MBC:ApplyTextColor("Your selections will be saved, and those items will ", MBC.COLORS.Text) ..
-        MBC:ApplyTextColor("always", MBC.COLORS.Highlight) ..
-        MBC:ApplyTextColor(" be kept from auto-selling.\n\n", MBC.COLORS.Text) ..
-        MBC:ApplyTextColor("Certain items, like ", MBC.COLORS.Text) ..
-        MBC:ApplyTextColor("cloth", MBC.COLORS.Highlight) .. 
-        MBC:ApplyTextColor(", ", MBC.COLORS.Text) ..
-        MBC:ApplyTextColor("leather", MBC.COLORS.Highlight) ..
-        MBC:ApplyTextColor(", ", MBC.COLORS.Text) ..
-        MBC:ApplyTextColor("potions", MBC.COLORS.Highlight) ..
-        MBC:ApplyTextColor(", and ", MBC.COLORS.Text) ..
-        MBC:ApplyTextColor("quest items", MBC.COLORS.Highlight) ..
-        MBC:ApplyTextColor(", will always be excluded from auto-selling.\n\n", MBC.COLORS.Text) ..
-        "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\RedMinus.tga:22:22:0:0:64:64:4:60:4:60|t" .. 
-        MBC:ApplyTextColor(" : Auto Vendor     ", MBC.COLORS.Text) ..
-        "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\GreenPlus.tga:22:22:0:0:64:64:4:60:4:60|t" ..
+        MBC:ApplyTextColor("These items haven't been sold before. Review them carefully and choose which ones should be auto-sold in the future.\n", MBC.COLORS.Text)..
+        MBC:ApplyTextColor("Your selections will be saved, and those items will ", MBC.COLORS.Text)..
+        MBC:ApplyTextColor("always", MBC.COLORS.Highlight)..
+        MBC:ApplyTextColor(" be kept from auto-selling.\n\n", MBC.COLORS.Text)..
+        MBC:ApplyTextColor("Certain items, like ", MBC.COLORS.Text)..
+        MBC:ApplyTextColor("cloth", MBC.COLORS.Highlight).. 
+        MBC:ApplyTextColor(", ", MBC.COLORS.Text)..
+        MBC:ApplyTextColor("leather", MBC.COLORS.Highlight)..
+        MBC:ApplyTextColor(", ", MBC.COLORS.Text)..
+        MBC:ApplyTextColor("potions", MBC.COLORS.Highlight)..
+        MBC:ApplyTextColor(", and ", MBC.COLORS.Text)..
+        MBC:ApplyTextColor("quest items", MBC.COLORS.Highlight)..
+        MBC:ApplyTextColor(", will always be excluded from auto-selling.\n\n", MBC.COLORS.Text)..
+        "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\RedMinus.tga:22:22:0:0:64:64:4:60:4:60|t".. 
+        MBC:ApplyTextColor(" : Auto Vendor   |   ", MBC.COLORS.Text)..
+        "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\GreenPlus.tga:22:22:0:0:64:64:4:60:4:60|t"..
         MBC:ApplyTextColor(" : Never Vendor", MBC.COLORS.Text)
     )
-
-    MBC:ApplyCustomFont(Description, 15)
-    PopOpenFrame:Hide()
 
     function PopOpenFrame:UpdatePoints()
         self:ClearAllPoints()
         self:SetPoint("BOTTOM", Parent, "TOP", 0, 0)
     end
 
+    MBC:ApplyCustomFont(Description, 15)
+
+    Parent.PopOpenFrame = PopOpenFrame
+    Parent.Description = Description
+    PopOpenFrame:Hide()
+
     return PopOpenFrame
 end
 
-
-function MBR:CreateSellPopup()
+function MBR:CreateSellOverview()
 
     local SettingsFrame = MBC:CreateGeneralWindow(UIParent, "Moron Box Repair", 500, 600)    
     SettingsFrame.ReturnButton:SetNormalTexture("Interface\\AddOns\\MoronBoxCore\\Media\\Icons\\ShowTooltip.tga")
     SettingsFrame.ReturnButton:SetPushedTexture("Interface\\AddOns\\MoronBoxCore\\Media\\Icons\\ShowTooltip.tga")    
+    local FrameHeight = SettingsFrame:GetHeight()
+    local LineWidth = SettingsFrame:GetWidth() - 60
 
     local ScrollFrame = CreateFrame("ScrollFrame", "SellItemsScrollFrame", SettingsFrame)
     ScrollFrame:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 20, -95)
@@ -136,17 +146,31 @@ function MBR:CreateSellPopup()
 
     local ScrollChild = CreateFrame("Frame", "SellItemsScrollChild", ScrollFrame)
     ScrollChild:SetSize(ScrollFrame:GetWidth(), 1)
-    ScrollFrame:SetScrollChild(ScrollChild)
-    
+    ScrollFrame:SetScrollChild(ScrollChild)    
     ScrollFrame:EnableMouseWheel(true)
-    ScrollFrame:SetScript("OnMouseWheel", function(self, delta)
-        local current = self:GetVerticalScroll()
-        local maxScroll = self:GetVerticalScrollRange()
-        local newScroll = math.max(0, math.min(current - (delta * 20), maxScroll))
-        self:SetVerticalScroll(newScroll)
-    end)
 
     local PopOpenFrame = MBR:CreatePopOpenFrame(SettingsFrame)
+    local Description = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    Description:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 20, -60)
+    Description:SetWidth(SettingsFrame:GetWidth() - 40)
+    Description:SetJustifyH("CENTER")
+    Description:SetJustifyV("MIDDLE")
+    Description:SetWordWrap(true)
+    Description:SetText(
+        "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\RedMinus.tga:22:22:0:0:64:64:4:60:4:60|t".. 
+        MBC:ApplyTextColor(" : Auto Vendor   |   ", MBC.COLORS.Text)..
+        "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\GreenPlus.tga:22:22:0:0:64:64:4:60:4:60|t"..
+        MBC:ApplyTextColor(" : Never Vendor", MBC.COLORS.Text)
+    )
+
+    local OffsetY = FrameHeight * 0.5 - 85
+    MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.COLORS.LineColor)
+
+    local ItemHeight = MBR:SellItems(ScrollChild)
+    ScrollChild:SetHeight(ItemHeight)
+
+    local ConfirmButton = MBC:CreateButton(SettingsFrame, 150, 35, "Confirm")
+    ConfirmButton:SetPoint("CENTER", SettingsFrame, "BOTTOM", 0, 60)
 
     SettingsFrame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
@@ -165,66 +189,28 @@ function MBR:CreateSellPopup()
         PopOpenFrame:Hide()
     end)
 
-    local Description = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    Description:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 20, -60)
-    Description:SetWidth(SettingsFrame:GetWidth() - 40)
-    Description:SetJustifyH("CENTER")
-    Description:SetJustifyV("MIDDLE")
-    Description:SetWordWrap(true)
-    Description:SetText(
-        "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\RedMinus.tga:22:22:0:0:64:64:4:60:4:60|t" .. 
-        MBC:ApplyTextColor(" : Auto Vendor     ", MBC.COLORS.Text) ..
-        "|TInterface\\AddOns\\MoronBoxCore\\Media\\Icons\\GreenPlus.tga:22:22:0:0:64:64:4:60:4:60|t" ..
-        MBC:ApplyTextColor(" : Never Vendor", MBC.COLORS.Text)
-    )
-    SettingsFrame.Description = Description
+    ScrollFrame:SetScript("OnMouseWheel", function(self, delta)
+        local current = self:GetVerticalScroll()
+        local maxScroll = self:GetVerticalScrollRange()
+        local newScroll = math.max(0, math.min(current - (delta * 20), maxScroll))
+        self:SetVerticalScroll(newScroll)
+    end)
+
+    ConfirmButton:SetScript("OnClick", function()
+        MBR:ConfirmChoices()
+    end)
+
+    MerchantFrame:HookScript("OnHide", function()
+        MBC:HideFrameIfShown(SettingsFrame)
+    end)
+    
     MBC:ApplyCustomFont(Description, 15)
 
-    local FrameHeight = SettingsFrame:GetHeight()
-    local LineWidth = SettingsFrame:GetWidth() - 60
-    local OffsetY = FrameHeight * 0.5 - 85
-
-    MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.COLORS.LineColor)
-
-    local totalItemHeight = MBR:SellItems(ScrollChild)
-    ScrollChild:SetHeight(totalItemHeight)
-
-    local function OnMerchantFrameHide()
-        if SettingsFrame:IsVisible() then
-            SettingsFrame:Hide()
-        end
-    end
-
-    MerchantFrame:HookScript("OnHide", OnMerchantFrameHide)
-
-    local ConfirmButton = MBC:CreateButton(SettingsFrame, 150, 35, "Confirm")
-    ConfirmButton:SetPoint("CENTER", SettingsFrame, "BOTTOM", 0, 60)
-    
-    ConfirmButton:SetScript("OnClick", function()
-
-        if #MBR.Session.PossibleVendorItems == 0 then
-            MerchantFrame:Hide()
-            return
-        end
-    
-        MBC:Print("Adding items to allowed to vendor list...")
-
-        local ItemsAdded = 0
-        for _, Item in ipairs(MBR.Session.PossibleVendorItems) do
-            if not MBR:ItemExistsInAllowed(Item) then
-                table.insert(MoronBoxRepair_Settings.AllowedVendorItems, Item)
-                ItemsAdded = ItemsAdded + 1
-            end
-        end
-        
-        if ItemsAdded > 0 then
-            MBC:Print(ItemsAdded.." items have been added to the allowed to vendor list.")
-        end
-    
-        MBR.Session.PossibleVendorItems = {}
-        MBR:SellGreyItems()
-        MerchantFrame:Hide()
-    end)
+    SettingsFrame.ScrollFrame = ScrollFrame
+    SettingsFrame.ScrollFrame.ScrollChild = ScrollChild
+    SettingsFrame.PopOpenFrame = PopOpenFrame
+    SettingsFrame.ConfirmButton = ConfirmButton
+    SettingsFrame.Description = Description
 
     return SettingsFrame
 end
@@ -240,16 +226,12 @@ function MBR:SellItems(Parent)
             ItemFrame:SetPoint("TOP", Parent, "TOP", 0, -Height)
 
             local ItemIcon = MBC:CreateItemIcon(ItemFrame, Item, 37, 37)
-            ItemFrame.ItemIcon = ItemIcon
 
             local ItemName = ItemFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
             ItemName:SetPoint("CENTER", ItemFrame, "CENTER", 0, 0)
             ItemName:SetText(Item.Name)
-            MBC:ApplyCustomFont(ItemName, 15)
-            ItemFrame.ItemName = ItemName
 
             local UnSelectButton = MBC:ToggleButton(ItemFrame, 24, 24)
-            ItemFrame.UnSelectButton = UnSelectButton
 
             ItemIcon:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_LEFT")
@@ -269,6 +251,12 @@ function MBR:SellItems(Parent)
                 end
                 UnSelectButton.UpdateButtonIcon(Item)
             end)
+
+            MBC:ApplyCustomFont(ItemName, 15)
+
+            ItemFrame.ItemIcon = ItemIcon
+            ItemFrame.ItemName = ItemName
+            ItemFrame.UnSelectButton = UnSelectButton
 
             Height = Height + 45
         end

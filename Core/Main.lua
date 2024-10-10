@@ -126,8 +126,6 @@ function MBR:SellGreyItems()
                         itemsSold = itemsSold + 1
                         UseContainerItem(i, y)
 
-                        MBC:Print("Sold: "..currentItemLink.." (x"..itemCount..") for "..GetCoinTextureString(itemSellPrice * itemCount))
-
                     elseif isWhiteItem then
 
                         if MBR:ItemExistsInAllowed({ Link = itemLink }) then
@@ -137,9 +135,9 @@ function MBR:SellGreyItems()
                             itemsSold = itemsSold + 1
                             UseContainerItem(i, y)
     
-                            MBC:Print("Sold: "..currentItemLink.." (x"..itemCount..") for "..GetCoinTextureString(itemSellPrice * itemCount))    
-                        
-                        elseif not MBR:ItemIsBlacklist({ Link = itemLink }) and not MBR:ItemExistsInAllowed({ Link = itemLink }) then
+                        elseif not MBR:ItemIsBlacklist({ Link = itemLink }) 
+                            and not MBR:ItemExistsInAllowed({ Link = itemLink }) 
+                            and not MBR:ItemExistsInPossibleVendorItems({ Link = itemLink }) then
   
                             table.insert(MBR.Session.PossibleVendorItems, {
                                 Name = itemName,
@@ -154,11 +152,11 @@ function MBR:SellGreyItems()
     end
 
     if #MBR.Session.PossibleVendorItems > 0 then
-        MBR:CreateSellPopup()
+        MBR:CreateSellOverview()
     end
 
     if itemsSold > 0 then
-        MBC:Print("Total items sold: " .. itemsSold .. " (" .. amountSold .. " in total) for a combined price of " .. GetCoinTextureString(totalPrice))
+        MBC:Print("Total items sold: "..itemsSold.." ("..amountSold.." in total) for a combined price of "..GetCoinTextureString(totalPrice))
     end
 end
 
