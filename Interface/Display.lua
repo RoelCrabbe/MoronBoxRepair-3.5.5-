@@ -23,7 +23,7 @@ function MBR:GeneralSettingWindow()
     MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.COLORS.LineColor)
 
     -- Auto Open Banks / Vendors
-    local AutoOpenVendorCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoOpenVendor)
+    local AutoOpenVendorCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.VendorSettings.AutoOpenInteraction)
     AutoOpenVendorCheckbox:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 45, -120)
 
     local AutoOpenVendorLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -32,11 +32,11 @@ function MBR:GeneralSettingWindow()
     MBC:ApplyCustomFont(AutoOpenVendorLabel, 14)
 
     AutoOpenVendorCheckbox:SetScript("OnClick", function(self)
-        MoronBoxRepair_Settings.AutoOpenVendor = (self:GetChecked() == 1)  
+        MoronBoxRepair_Settings.VendorSettings.AutoOpenInteraction = (self:GetChecked() == 1)  
     end)
 
     -- Auto Repair Items
-    local AutoRepairCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoRepair)
+    local AutoRepairCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.VendorSettings.AutoRepair)
     AutoRepairCheckbox:SetPoint("TOPLEFT", AutoOpenVendorCheckbox, "BOTTOMLEFT", 0, -15)
 
     local AutoRepairLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -45,11 +45,11 @@ function MBR:GeneralSettingWindow()
     MBC:ApplyCustomFont(AutoRepairLabel, 14)
 
     AutoRepairCheckbox:SetScript("OnClick", function(self)
-        MoronBoxRepair_Settings.AutoRepair = (self:GetChecked() == 1)  
+        MoronBoxRepair_Settings.VendorSettings.AutoRepair = (self:GetChecked() == 1)  
     end)
 
     -- Auto Sell Gray / Whites
-    local AutoSellGreyCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.AutoSellGrey)
+    local AutoSellGreyCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.VendorSettings.AutoSellGrey)
     AutoSellGreyCheckbox:SetPoint("TOPLEFT", AutoRepairCheckbox, "BOTTOMLEFT", 0, -15)
 
     local AutoSellGreyLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -58,7 +58,7 @@ function MBR:GeneralSettingWindow()
     MBC:ApplyCustomFont(AutoSellGreyLabel, 14)
 
     AutoSellGreyCheckbox:SetScript("OnClick", function(self)
-        MoronBoxRepair_Settings.AutoSellGrey = (self:GetChecked() == 1) 
+        MoronBoxRepair_Settings.VendorSettings.AutoSellGrey = (self:GetChecked() == 1) 
     end)
 
     SettingsFrame.ReturnButton:SetScript("OnClick", function()
@@ -73,9 +73,9 @@ function MBR:GeneralSettingWindow()
     MBC:ApplyCustomFont(Description, 15)
 
     SettingsFrame.Description = Description
-    SettingsFrame.AutoOpenVendorCheckbox = AutoOpenVendorCheckbox
-    SettingsFrame.AutoRepairCheckbox = AutoRepairCheckbox
-    SettingsFrame.AutoSellGreyCheckbox = AutoSellGreyCheckbox
+    SettingsFrame.VendorSettings.AutoOpenInteractionCheckbox = AutoOpenVendorCheckbox
+    SettingsFrame.VendorSettings.AutoRepairCheckbox = AutoRepairCheckbox
+    SettingsFrame.VendorSettings.AutoSellGreyCheckbox = AutoSellGreyCheckbox
 
     return SettingsFrame
 end
@@ -177,13 +177,13 @@ function MBR:CreateSellOverview()
         PopOpenFrame:UpdatePoints()
     end)
 
-    SettingsFrame.ReturnButton:SetScript("OnClick", function()
-        MBC:ToggleFrame(SettingsFrame.PopOpenFrame)
+    SettingsFrame.ReturnButton:SetScript("OnClick", function(self)
+        MBC:ToggleFrame(PopOpenFrame)
         PopOpenFrame:UpdatePoints()
     end)
 
-    SettingsFrame.CloseButton:SetScript("OnClick", function()
-        MBR.Session.PossibleVendorItems = {} 
+    SettingsFrame.CloseButton:SetScript("OnClick", function(self)
+        MBR.Session.PossibleVendorItems.WhiteListed = {} 
         MerchantFrame:Hide()
         SettingsFrame:Hide()
         PopOpenFrame:Hide()
@@ -196,11 +196,11 @@ function MBR:CreateSellOverview()
         self:SetVerticalScroll(newScroll)
     end)
 
-    ConfirmButton:SetScript("OnClick", function()
+    ConfirmButton:SetScript("OnClick", function(self)
         MBR:ConfirmChoices()
     end)
 
-    MerchantFrame:HookScript("OnHide", function()
+    MerchantFrame:HookScript("OnHide", function(self)
         MBC:HideFrameIfShown(SettingsFrame)
     end)
     
@@ -219,7 +219,7 @@ function MBR:SellItems(Parent)
     if not Parent then return end
 
     local Height = 0
-    for Num, Item in ipairs(MBR.Session.PossibleVendorItems) do
+    for Num, Item in ipairs(MBR.Session.PossibleVendorItems.WhiteListed) do
         if Item.Icon and Item.Link then
 
             local ItemFrame = MBC:CreateFrame(Parent, MBC.BACKDROPS.Blizz_Border, Parent:GetWidth() * 0.66, 45)

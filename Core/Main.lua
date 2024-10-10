@@ -8,12 +8,16 @@ MBR = CreateFrame("Frame", "MoronBoxRepair", UIParent)
 -- The Stored Variables {{{
 -------------------------------------------------------------------------------
 
-MBR.DefaultOptions = { -- Saved Variables default settings, ours are called MoronBoxRepair_Settings
-    AutoOpenVendor = true,
-    AutoRepair = true,
-    AutoSellGrey = true,
-    AllowedVendorItems = {}, -- Here the items that CAN be vendored.
-    BlackListedVendorItems = {} -- There are the items that can't
+MBR.DefaultOptions = {
+    VendorSettings = {
+        AutoOpenInteraction = true,
+        AutoRepair = true,
+        AutoSellGrey = true
+    },
+    VendorItems = {
+        WhiteListed = {},
+        BlackListed = {}
+    }
 }
 
 -------------------------------------------------------------------------------
@@ -21,8 +25,22 @@ MBR.DefaultOptions = { -- Saved Variables default settings, ours are called Moro
 -------------------------------------------------------------------------------
 
 MBR.Session = {
-    PossibleVendorItems = {} -- These are the items that are local and not stored
+    PossibleVendorItems = {
+        WhiteListed = {},
+        BlackListed = {}
+    }
 }
+
+function MBR:HasVendorItems()
+    return (next(MBR.Session.PossibleVendorItems.WhiteListed) ~= nil or next(MBR.Session.PossibleVendorItems.BlackListed) ~= nil)
+end
+
+function MBR:ResetPossibleVendorItems()
+    MBR.Session.PossibleVendorItems = {
+        WhiteListed = {},
+        BlackListed = {}
+    }
+end
 
 -------------------------------------------------------------------------------
 -- Core Event Code {{{
@@ -41,7 +59,7 @@ function MBR:OnEvent(event)
         MBR:SellGreyItems()
         MBR:RepairItems()
     elseif event == "MERCHANT_CLOSE" or event == "GOSSIP_CLOSED" then
-        MBR.Session.PossibleVendorItems = {}        
+        MBR:ResetPossibleVendorItems()       
     elseif event == "GOSSIP_SHOW" then
         MBR:OpenVendorOrBank()
     end
@@ -67,7 +85,7 @@ end
 
 function MBR:RepairItems()
 
-    if not MoronBoxRepair_Settings.AutoRepair or CanMerchantRepair() ~= 1 then 
+    if not MoronBoxRepair_Settings.VendorSettings.AutoRepair or CanMerchantRepair() ~= 1 then 
         return 
     end
 
@@ -86,7 +104,7 @@ end
 
 function MBR:SellGreyItems()
 
-    if not MoronBoxRepair_Settings.AutoSellGrey then 
+    if not MoronBoxRepair_Settings.VendorSettings.AutoSellGrey then 
         return 
     end
 
@@ -128,7 +146,7 @@ function MBR:SellGreyItems()
 
                     elseif isWhiteItem then
 
-                        if MBR:ItemExistsInAllowed({ Link = itemLink }) then
+                        if MBR:ItemIsWhitelist({ Link = itemLink }) then
 
                             totalPrice = totalPrice + (itemSellPrice * itemCount)
                             amountSold = amountSold + itemCount
@@ -136,10 +154,10 @@ function MBR:SellGreyItems()
                             UseContainerItem(i, y)
     
                         elseif not MBR:ItemIsBlacklist({ Link = itemLink }) 
-                            and not MBR:ItemExistsInAllowed({ Link = itemLink }) 
+                            and not MBR:ItemIsWhitelist({ Link = itemLink }) 
                             and not MBR:ItemExistsInPossibleVendorItems({ Link = itemLink }) then
   
-                            table.insert(MBR.Session.PossibleVendorItems, {
+                            table.insert(MBR.Session.PossibleVendorItems.WhiteListed, {
                                 Name = itemName,
                                 Link = itemLink,
                                 Icon = itemTexture
@@ -151,7 +169,7 @@ function MBR:SellGreyItems()
         end
     end
 
-    if #MBR.Session.PossibleVendorItems > 0 then
+    if MBR:HasVendorItems() then
         MBR:CreateSellOverview()
     end
 
@@ -161,7 +179,7 @@ function MBR:SellGreyItems()
 end
 
 function MBR:OpenVendorOrBank()
-    if MoronBoxRepair_Settings.AutoOpenVendor then
+    if MoronBoxRepair_Settings.VendorSettings.AutoOpenInteraction then
         for i = 1, GetNumGossipOptions() do
             local GossipText, GossipType = GetGossipOptions(i)
 

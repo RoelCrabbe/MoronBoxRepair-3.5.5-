@@ -4,7 +4,7 @@
 
 function MBR:ItemIsBlacklist(Item)
     if not Item then return end
-    for _, BlacklistItem in ipairs(MoronBoxRepair_Settings.BlackListedVendorItems) do
+    for _, BlacklistItem in ipairs(MoronBoxRepair_Settings.VendorItems.BlackListed) do
         if BlacklistItem.Link == Item.Link then
             return true
         end
@@ -14,10 +14,10 @@ end
 
 function MBR:AddToBlacklist(Item)
     if not Item then return end
-    table.insert(MoronBoxRepair_Settings.BlackListedVendorItems, Item)
-    for i, allowedItem in ipairs(MBR.Session.PossibleVendorItems) do
+    table.insert(MoronBoxRepair_Settings.VendorItems.BlackListed, Item)
+    for i, allowedItem in ipairs(MBR.Session.PossibleVendorItems.WhiteListed) do
         if allowedItem.Link == Item.Link then
-            table.remove(MBR.Session.PossibleVendorItems, i)
+            table.remove(MBR.Session.PossibleVendorItems.WhiteListed, i)
             break
         end
     end
@@ -25,18 +25,18 @@ end
 
 function MBR:RemoveFromBlacklist(Item)
     if not Item then return end
-    table.insert(MBR.Session.PossibleVendorItems, Item)
-    for i, allowedItem in ipairs(MoronBoxRepair_Settings.BlackListedVendorItems) do
+    table.insert(MBR.Session.PossibleVendorItems.WhiteListed, Item)
+    for i, allowedItem in ipairs(MoronBoxRepair_Settings.VendorItems.BlackListed) do
         if allowedItem.Link == Item.Link then
-            table.remove(MoronBoxRepair_Settings.BlackListedVendorItems, i)
+            table.remove(MoronBoxRepair_Settings.VendorItems.BlackListed, i)
             break
         end
     end
 end
 
-function MBR:ItemExistsInAllowed(Item)
+function MBR:ItemIsWhitelist(Item)
     if not Item then return end
-    for _, AllowedItem in ipairs(MoronBoxRepair_Settings.AllowedVendorItems) do
+    for _, AllowedItem in ipairs(MoronBoxRepair_Settings.VendorItems.WhiteListed) do
         if AllowedItem.Link == Item.Link then
             return true
         end
@@ -44,9 +44,10 @@ function MBR:ItemExistsInAllowed(Item)
     return false
 end
 
-function MBR:ItemExistsInPossibleVendorItems(item)
-    for _, vendorItem in ipairs(MBR.Session.PossibleVendorItems) do
-        if vendorItem.Link == item.Link then
+function MBR:ItemExistsInPossibleVendorItems(Item)
+    if not Item then return end
+    for _, vendorItem in ipairs(MBR.Session.PossibleVendorItems.WhiteListed) do
+        if vendorItem.Link == Item.Link then
             return true
         end
     end
