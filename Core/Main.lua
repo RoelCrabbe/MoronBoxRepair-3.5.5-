@@ -31,17 +31,6 @@ MBR.Session = {
     }
 }
 
-function MBR:HasVendorItems()
-    return (next(MBR.Session.PossibleVendorItems.WhiteListed) ~= nil or next(MBR.Session.PossibleVendorItems.BlackListed) ~= nil)
-end
-
-function MBR:ResetPossibleVendorItems()
-    MBR.Session.PossibleVendorItems = {
-        WhiteListed = {},
-        BlackListed = {}
-    }
-end
-
 -------------------------------------------------------------------------------
 -- Core Event Code {{{
 -------------------------------------------------------------------------------
@@ -53,15 +42,15 @@ MBR:RegisterEvent("GOSSIP_SHOW")
 MBR:RegisterEvent("GOSSIP_CLOSED")
 
 function MBR:OnEvent(event)
-    if event == "ADDON_LOADED" and arg1 == MBR:GetName() then
-        MBR:SetupSavedVariables()
+    if event == "ADDON_LOADED" and arg1 == self:GetName() then
+        self:SetupSavedVariables()
     elseif event == "MERCHANT_SHOW" then
-        MBR:SellGreyItems()
-        MBR:RepairItems()
+        self:SellGreyItems()
+        self:RepairItems()
     elseif event == "MERCHANT_CLOSE" or event == "GOSSIP_CLOSED" then
-        MBR:ResetPossibleVendorItems()       
+        self:ResetPossibleVendorItems()       
     elseif event == "GOSSIP_SHOW" then
-        MBR:OpenVendorOrBank()
+        self:OpenVendorOrBank()
     end
 end
 
@@ -72,11 +61,17 @@ function MBR:SetupSavedVariables()
         MoronBoxRepair_Settings = {}
     end
 
-    for key, value in InTable(MBR.DefaultOptions) do
-        if MoronBoxRepair_Settings[key] == nil then
-            MoronBoxRepair_Settings[key] = value
+    for k, v in ipairs(self.DefaultOptions) do
+        if MoronBoxRepair_Settings[k] == nil then
+            MoronBoxRepair_Settings[k] = v
         end
     end
+end
+
+function MBR:ResetToDefaults()
+    MoronBoxRepair_Settings = self.DefaultOptions
+    self:ResetPossibleVendorItems()
+    ReloadUI()
 end
 
 -------------------------------------------------------------------------------
@@ -144,20 +139,20 @@ function MBR:SellGreyItems()
                         itemsSold = itemsSold + 1
                         UseContainerItem(i, y)
 
-                    elseif isWhiteItem then
+                    elseif isWhiteItem and itemSellPrice > 0 then
 
-                        if MBR:ItemIsWhitelist({ Link = itemLink }) then
+                        if self:ItemIsWhitelist({ Link = itemLink }) then
 
                             totalPrice = totalPrice + (itemSellPrice * itemCount)
                             amountSold = amountSold + itemCount
                             itemsSold = itemsSold + 1
                             UseContainerItem(i, y)
     
-                        elseif not MBR:ItemIsBlacklist({ Link = itemLink }) 
-                            and not MBR:ItemIsWhitelist({ Link = itemLink }) 
-                            and not MBR:ItemExistsInPossibleVendorItems({ Link = itemLink }) then
+                        elseif not self:ItemIsBlacklist({ Link = itemLink }) 
+                            and not self:ItemIsWhitelist({ Link = itemLink }) 
+                            and not self:ItemExistsInPossibleVendorItems({ Link = itemLink }) then
   
-                            table.insert(MBR.Session.PossibleVendorItems.WhiteListed, {
+                            table.insert(self.Session.PossibleVendorItems.WhiteListed, {
                                 Name = itemName,
                                 Link = itemLink,
                                 Icon = itemTexture
@@ -169,8 +164,8 @@ function MBR:SellGreyItems()
         end
     end
 
-    if MBR:HasVendorItems() then
-        MBR:CreateSellOverview()
+    if self:HasVendorItems() then
+        self:CreateSellOverview()
     end
 
     if itemsSold > 0 then

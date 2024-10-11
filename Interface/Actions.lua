@@ -12,15 +12,15 @@ function MBR:ConfirmChoices()
     local WhiteListedItemsAdded = self:ProcessWhiteListedItems()
     local BlackListedItemsAdded = self:ProcessBlackListedItems()
 
-    if WhiteListedItemsAdded > 0 or BlackListedItemsAdded > 0 then
+    if WhiteListedItemsAdded > 0 then
         local WhiteItemText = WhiteListedItemsAdded == 1 and "item has" or "items have"
+        MBC:Print(WhiteListedItemsAdded.." "..WhiteItemText.." been added to the vendor list.")
+    end
+
+    if BlackListedItemsAdded > 0 then
         local BlackItemText = BlackListedItemsAdded == 1 and "item won't" or "items won't"
-        MBC:Print(
-            (WhiteListedItemsAdded > 0 and (WhiteListedItemsAdded.." "..WhiteItemText.." been added to the vendor list.") or "") ..
-            (WhiteListedItemsAdded > 0 and BlackListedItemsAdded > 0 and " " or "") ..
-            (BlackListedItemsAdded > 0 and (BlackListedItemsAdded.." "..BlackItemText.." be vendored from now on.") or "")
-        )
-    end    
+        MBC:Print(BlackListedItemsAdded.." "..BlackItemText.." be vendored from now on.")
+    end 
 
     self:ResetPossibleVendorItems()
     self:SellGreyItems()
@@ -28,23 +28,57 @@ function MBR:ConfirmChoices()
 end
 
 function MBR:ProcessWhiteListedItems()
-    local ItemsAdded = 0
-    for _, Item in ipairs(self.Session.PossibleVendorItems.WhiteListed) do
-        if not self:ItemExistsInAllowed(Item) then
-            table.insert(MoronBoxRepair_Settings.VendorItems.WhiteListed, Item)
-            ItemsAdded = ItemsAdded + 1
+    local i = 0
+    for k, v in ipairs(self.Session.PossibleVendorItems.WhiteListed) do
+        if not self:ItemIsWhitelist(v) then
+            table.insert(MoronBoxRepair_Settings.VendorItems.WhiteListed, v)
+            i = i + 1
         end
     end
-    return ItemsAdded
+    return i
 end
 
 function MBR:ProcessBlackListedItems()
-    local ItemsAdded = 0
-    for _, Item in ipairs(self.Session.PossibleVendorItems.BlackListed) do
-        if not self:ItemIsBlacklist(Item) then
-            table.insert(MoronBoxRepair_Settings.VendorItems.BlackListed, Item)
-            ItemsAdded = ItemsAdded + 1
+    local i = 0
+    for k, v in ipairs(self.Session.PossibleVendorItems.BlackListed) do
+        if not self:ItemIsBlacklist(v) then
+            table.insert(MoronBoxRepair_Settings.VendorItems.BlackListed, v)
+            i = i + 1
         end
     end
-    return ItemsAdded
+    return i
+end
+
+-------------------------------------------------------------------------------
+-- Item Actions {{{
+-------------------------------------------------------------------------------
+
+function MBR:UnSelectChoice(Item)
+    if self:ItemExistsInPossibleVendorItems(Item) then
+        self:AddToBlacklist(Item)
+    else
+        self:RemoveFromBlacklist(Item)
+    end
+end
+
+function MBR:AddToBlacklist(Item)
+    if not Item then return end
+    table.insert(self.Session.PossibleVendorItems.BlackListed, Item)
+    for i, v in ipairs(self.Session.PossibleVendorItems.WhiteListed) do
+        if v.Link == Item.Link then
+            table.remove(self.Session.PossibleVendorItems.WhiteListed, i)
+            break
+        end
+    end
+end
+
+function MBR:RemoveFromBlacklist(Item)
+    if not Item then return end
+    table.insert(self.Session.PossibleVendorItems.WhiteListed, Item)
+    for i, v in ipairs(self.Session.PossibleVendorItems.BlackListed) do
+        if v.Link == Item.Link then
+            table.remove(self.Session.PossibleVendorItems.BlackListed, i)
+            break
+        end
+    end
 end

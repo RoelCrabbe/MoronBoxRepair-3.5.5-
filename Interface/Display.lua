@@ -61,6 +61,13 @@ function MBR:GeneralSettingWindow()
         MoronBoxRepair_Settings.VendorSettings.AutoSellGrey = (self:GetChecked() == 1) 
     end)
 
+    local ResetSavedVariables = MBC:CreateButton(SettingsFrame, 150, 35, "Reset to Defaults")
+    ResetSavedVariables:SetPoint("CENTER", SettingsFrame, "BOTTOM", 0, 60)
+
+    ResetSavedVariables:SetScript("OnClick", function()
+        StaticPopup_Show("CONFIRM_RESET_MBR")
+    end)
+
     SettingsFrame.ReturnButton:SetScript("OnClick", function()
         SettingsFrame:Hide()
         MBC:CreateSettingsWindow()
@@ -73,12 +80,25 @@ function MBR:GeneralSettingWindow()
     MBC:ApplyCustomFont(Description, 15)
 
     SettingsFrame.Description = Description
-    SettingsFrame.VendorSettings.AutoOpenInteractionCheckbox = AutoOpenVendorCheckbox
-    SettingsFrame.VendorSettings.AutoRepairCheckbox = AutoRepairCheckbox
-    SettingsFrame.VendorSettings.AutoSellGreyCheckbox = AutoSellGreyCheckbox
+    SettingsFrame.AutoOpenInteractionCheckbox = AutoOpenVendorCheckbox
+    SettingsFrame.AutoRepairCheckbox = AutoRepairCheckbox
+    SettingsFrame.AutoSellGreyCheckbox = AutoSellGreyCheckbox
 
     return SettingsFrame
 end
+
+StaticPopupDialogs["CONFIRM_RESET_MBR"] = {
+    text = "Are you sure you want to reset all settings to their default values?",
+    button1 = "Yes",
+    button2 = "No",
+    OnAccept = function()
+        MBR:ResetToDefaults()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
 
 -------------------------------------------------------------------------------
 -- Confirm Frame {{{
@@ -183,7 +203,7 @@ function MBR:CreateSellOverview()
     end)
 
     SettingsFrame.CloseButton:SetScript("OnClick", function(self)
-        MBR.Session.PossibleVendorItems.WhiteListed = {} 
+        MBR:ResetPossibleVendorItems()
         MerchantFrame:Hide()
         SettingsFrame:Hide()
         PopOpenFrame:Hide()
@@ -244,11 +264,7 @@ function MBR:SellItems(Parent)
             end)
 
             UnSelectButton:SetScript("OnClick", function(self)
-                if MBR:ItemIsBlacklist(Item) then
-                    MBR:RemoveFromBlacklist(Item)
-                else
-                    MBR:AddToBlacklist(Item)
-                end
+                MBR:UnSelectChoice(Item)
                 UnSelectButton.UpdateButtonIcon(Item)
             end)
 
