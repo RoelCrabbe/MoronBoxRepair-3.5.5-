@@ -12,7 +12,8 @@ MBR.DefaultOptions = {
     VendorSettings = {
         AutoOpenInteraction = true,
         AutoRepair = true,
-        AutoSellGrey = true
+        AutoSellGrey = true,
+        AutoBlackListMats = true
     },
     VendorItems = {
         WhiteListed = {},
@@ -28,6 +29,27 @@ MBR.Session = {
     PossibleVendorItems = {
         WhiteListed = {},
         BlackListed = {}
+    },
+    ItemsToSkip = {
+        ["Skinning Knife"] = true,
+        ["Salt Shaker"] = true,
+        ["Mining Pick"] = true,
+        ["Blacksmith Hammer"] = true,
+        ["Arclight Spanner"] = true,
+        ["Gyromatic Micro-Adjustor"] = true,
+        ["Flash Powder"] = true,
+        ["Wild Thornroot"] = true,
+        ["Ironwood Seed"] = true,
+        ["Sacred Candle"] = true,
+        ["Ankh"] = true,
+        ["Arcane Powder"] = true,
+        ["Rune of Portals"] = true,
+        ["Symbol of Kings"] = true,
+        ["Symbol of Divinity"] = true
+    },
+    ItemsToSell = {
+        ["Raptor Hide"] = true,
+        ["Thick Hide"] = true,
     }
 }
 
@@ -61,11 +83,22 @@ function MBR:SetupSavedVariables()
         MoronBoxRepair_Settings = {}
     end
 
-    for k, v in ipairs(self.DefaultOptions) do
-        if MoronBoxRepair_Settings[k] == nil then
-            MoronBoxRepair_Settings[k] = v
+    local function InitializeDefaults(defaults, settings)
+        for k, v in pairs(defaults) do
+            if type(v) == "table" then
+                if settings[k] == nil then
+                    settings[k] = {}
+                end
+                InitializeDefaults(v, settings[k])
+            else
+                if settings[k] == nil then
+                    settings[k] = v
+                end
+            end
         end
     end
+
+    InitializeDefaults(self.DefaultOptions, MoronBoxRepair_Settings)
 end
 
 function MBR:ResetToDefaults()
@@ -119,44 +152,59 @@ function MBR:SellGreyItems()
                 local isWhiteItem = itemRarity == 1
                 local isTradeGoods = itemType == "Trade Goods"
                 local isConsumable = itemType == "Consumable"
-                local isQuestItem = itemType == "Quest"
-                local isHearthStone =  itemName == "Hearthstone"
+
+                -- Other skip conditions
                 local isPotion = isConsumable and itemSubType == "Potion"
                 local isHerb = isTradeGoods and itemSubType == "Herb"
                 local isLeather = isTradeGoods and itemSubType == "Leather"
                 local isCloth = isTradeGoods and itemSubType == "Cloth"
+                local isMiningItem = isTradeGoods and itemSubType == "Metal & Stone"
                 local isFood = isConsumable and (itemSubType == "Food" or itemSubType == "Drink" or itemSubType == "Food & Drink")
-                local isSpecialWeapon = itemType == "Weapon" and itemSubType == "Miscellaneous"
 
-                -- Skip items that should not be sold
-                if not (isQuestItem or isHearthStone or isPotion or isHerb or isLeather or isCloth or isFood or isSpecialWeapon) then
+                -- Skip if it's meets other skip criteria
+                local isSellable = not (isPotion or isHerb or isLeather or isCloth or isMiningItem or isFood)
+
+                -- Skip items that are in the skip list or are not sellable
+                if not self.Session.ItemsToSkip[itemName] and itemSellPrice > 0 then
 
                     -- Sell gray items
-                    if isGreyItem and itemSellPrice > 0 then
+                    if isGreyItem then
 
                         totalPrice = totalPrice + (itemSellPrice * itemCount)
                         amountSold = amountSold + itemCount
                         itemsSold = itemsSold + 1
                         UseContainerItem(i, y)
 
-                    elseif isWhiteItem and itemSellPrice > 0 then
+                    -- Sell white items
+                    elseif isWhiteItem then
 
-                        if self:ItemIsWhitelist({ Link = itemLink }) then
+                        if self.Session.ItemsToSell[itemName] then
 
                             totalPrice = totalPrice + (itemSellPrice * itemCount)
                             amountSold = amountSold + itemCount
                             itemsSold = itemsSold + 1
                             UseContainerItem(i, y)
-    
-                        elseif not self:ItemIsBlacklist({ Link = itemLink }) 
-                            and not self:ItemIsWhitelist({ Link = itemLink }) 
-                            and not self:ItemExistsInPossibleVendorItems({ Link = itemLink }) then
-  
-                            table.insert(self.Session.PossibleVendorItems.WhiteListed, {
-                                Name = itemName,
-                                Link = itemLink,
-                                Icon = itemTexture
-                            })
+
+                        -- Skip items that should not be sold
+                        elseif isSellable or not MoronBoxRepair_Settings.VendorSettings.AutoBlackListMats then
+
+                            if self:ItemIsWhitelist({ Link = itemLink }) then
+                                
+                                totalPrice = totalPrice + (itemSellPrice * itemCount)
+                                amountSold = amountSold + itemCount
+                                itemsSold = itemsSold + 1
+                                UseContainerItem(i, y)
+
+                            elseif not self:ItemIsBlacklist({ Link = itemLink }) 
+                                and not self:ItemIsWhitelist({ Link = itemLink }) 
+                                and not self:ItemExistsInPossibleVendorItems({ Link = itemLink }) then
+
+                                table.insert(self.Session.PossibleVendorItems.WhiteListed, {
+                                    Name = itemName,
+                                    Link = itemLink,
+                                    Icon = itemTexture
+                                })
+                            end
                         end
                     end
                 end

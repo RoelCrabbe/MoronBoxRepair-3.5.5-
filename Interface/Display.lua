@@ -4,7 +4,7 @@
 
 function MBR:GeneralSettingWindow()
     
-    local SettingsFrame = MBC:CreateGeneralWindow(UIParent, "Moron Box Repair", 500, 400)
+    local SettingsFrame = MBC:CreateGeneralWindow(UIParent, "Moron Box Repair", 500, 450)
     local FrameHeight = SettingsFrame:GetHeight()
     local LineWidth = SettingsFrame:GetWidth() - 60
 
@@ -31,10 +31,6 @@ function MBR:GeneralSettingWindow()
     AutoOpenVendorLabel:SetText(MBC:ApplyTextColor("Enable Auto Open Vendor & Bankers", MBC.COLORS.Text))  
     MBC:ApplyCustomFont(AutoOpenVendorLabel, 14)
 
-    AutoOpenVendorCheckbox:SetScript("OnClick", function(self)
-        MoronBoxRepair_Settings.VendorSettings.AutoOpenInteraction = (self:GetChecked() == 1)  
-    end)
-
     -- Auto Repair Items
     local AutoRepairCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.VendorSettings.AutoRepair)
     AutoRepairCheckbox:SetPoint("TOPLEFT", AutoOpenVendorCheckbox, "BOTTOMLEFT", 0, -15)
@@ -44,25 +40,50 @@ function MBR:GeneralSettingWindow()
     AutoRepairLabel:SetText(MBC:ApplyTextColor("Enable Auto Repair", MBC.COLORS.Text))  
     MBC:ApplyCustomFont(AutoRepairLabel, 14)
 
-    AutoRepairCheckbox:SetScript("OnClick", function(self)
-        MoronBoxRepair_Settings.VendorSettings.AutoRepair = (self:GetChecked() == 1)  
-    end)
-
     -- Auto Sell Gray / Whites
     local AutoSellGreyCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.VendorSettings.AutoSellGrey)
     AutoSellGreyCheckbox:SetPoint("TOPLEFT", AutoRepairCheckbox, "BOTTOMLEFT", 0, -15)
 
     local AutoSellGreyLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     AutoSellGreyLabel:SetPoint("LEFT", AutoSellGreyCheckbox, "RIGHT", 15, 0)  
-    AutoSellGreyLabel:SetText(MBC:ApplyTextColor("Enable Auto Sell Grey Items", MBC.COLORS.Text))  
+    AutoSellGreyLabel:SetText(MBC:ApplyTextColor("Enable Auto Sell Grey & White Items", MBC.COLORS.Text))  
     MBC:ApplyCustomFont(AutoSellGreyLabel, 14)
 
-    AutoSellGreyCheckbox:SetScript("OnClick", function(self)
-        MoronBoxRepair_Settings.VendorSettings.AutoSellGrey = (self:GetChecked() == 1) 
-    end)
+    -- Auto Mats Blacklisting
+    local AutoBlackListMatsCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.VendorSettings.AutoBlackListMats)
+    AutoBlackListMatsCheckbox:SetPoint("TOPLEFT", AutoSellGreyCheckbox, "BOTTOMLEFT", 45, -15)
+
+    local AutoBlackListMatsLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    AutoBlackListMatsLabel:SetPoint("LEFT", AutoBlackListMatsCheckbox, "RIGHT", 15, 0)  
+    AutoBlackListMatsLabel:SetText(MBC:ApplyTextColor("Auto Mats & Food & Drink Blacklisting", MBC.COLORS.Text))  
+    MBC:ApplyCustomFont(AutoBlackListMatsLabel, 14)
 
     local ResetSavedVariables = MBC:CreateButton(SettingsFrame, 150, 35, "Reset to Defaults")
     ResetSavedVariables:SetPoint("CENTER", SettingsFrame, "BOTTOM", 0, 60)
+
+    AutoOpenVendorCheckbox:SetScript("OnClick", function(self)
+        MoronBoxRepair_Settings.VendorSettings.AutoOpenInteraction = (self:GetChecked() == 1)  
+    end)
+
+    AutoRepairCheckbox:SetScript("OnClick", function(self)
+        MoronBoxRepair_Settings.VendorSettings.AutoRepair = (self:GetChecked() == 1)  
+    end)
+
+    AutoSellGreyCheckbox:SetScript("OnClick", function(self)
+        MoronBoxRepair_Settings.VendorSettings.AutoSellGrey = (self:GetChecked() == 1)
+        if not MoronBoxRepair_Settings.VendorSettings.AutoSellGrey then
+            MoronBoxRepair_Settings.VendorSettings.AutoBlackListMats = false
+            AutoBlackListMatsCheckbox:SetChecked(false)
+        end
+    end)
+
+    AutoBlackListMatsCheckbox:SetScript("OnClick", function(self)
+        MoronBoxRepair_Settings.VendorSettings.AutoBlackListMats = (self:GetChecked() == 1)
+        if MoronBoxRepair_Settings.VendorSettings.AutoBlackListMats then
+            MoronBoxRepair_Settings.VendorSettings.AutoSellGrey = true
+            AutoSellGreyCheckbox:SetChecked(true)
+        end
+    end)
 
     ResetSavedVariables:SetScript("OnClick", function()
         StaticPopup_Show("CONFIRM_RESET_MBR")

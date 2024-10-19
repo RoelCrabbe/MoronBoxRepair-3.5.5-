@@ -13,14 +13,14 @@ function MBR:ConfirmChoices()
     local BlackListedItemsAdded = self:ProcessBlackListedItems()
 
     if WhiteListedItemsAdded > 0 then
-        local WhiteItemText = WhiteListedItemsAdded == 1 and "item has" or "items have"
-        MBC:Print(WhiteListedItemsAdded.." "..WhiteItemText.." been added to the vendor list.")
+        local WhiteItemText = WhiteListedItemsAdded == 1 and "There has been 1 item added" or "There have been " .. WhiteListedItemsAdded .. " items added"
+        MBC:Print(WhiteItemText .. " to the vendor list.")
     end
-
+    
     if BlackListedItemsAdded > 0 then
-        local BlackItemText = BlackListedItemsAdded == 1 and "item won't" or "items won't"
-        MBC:Print(BlackListedItemsAdded.." "..BlackItemText.." be vendored from now on.")
-    end 
+        local BlackItemText = BlackListedItemsAdded == 1 and "There is 1 item that won't be vendored" or "There have been " .. BlackListedItemsAdded .. " items that won't be vendored"
+        MBC:Print(BlackItemText .. " from now on.")
+    end    
 
     self:ResetPossibleVendorItems()
     self:SellGreyItems()
