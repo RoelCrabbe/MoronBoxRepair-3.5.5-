@@ -5,7 +5,7 @@
 function MBR:ConfirmChoices()
     
     if not self:HasVendorItems() then
-        MerchantFrame:Hide()
+        MBC:HideFrameIfShown(MerchantFrame)
         return
     end
 
@@ -13,18 +13,24 @@ function MBR:ConfirmChoices()
     local BlackListedItemsAdded = self:ProcessBlackListedItems()
 
     if WhiteListedItemsAdded > 0 then
-        local WhiteItemText = WhiteListedItemsAdded == 1 and "There has been 1 item added" or "There have been " .. WhiteListedItemsAdded .. " items added"
-        MBC:Print(WhiteItemText .. " to the vendor list.")
+        local WhiteItemText = WhiteListedItemsAdded == 1 
+            and MBR:SL("WhiteListed Single") 
+            or MBR:SL("WhiteListed Multiple", WhiteListedItemsAdded)
+    
+        MBC:Print(WhiteItemText)
     end
     
     if BlackListedItemsAdded > 0 then
-        local BlackItemText = BlackListedItemsAdded == 1 and "There is 1 item that won't be vendored" or "There have been " .. BlackListedItemsAdded .. " items that won't be vendored"
-        MBC:Print(BlackItemText .. " from now on.")
-    end    
+        local BlackItemText = BlackListedItemsAdded == 1 
+            and MBR:SL("BlackListed Single") 
+            or MBR:SL("BlackListed Multiple", BlackListedItemsAdded)
+    
+        MBC:Print(BlackItemText)
+    end
 
     self:ResetPossibleVendorItems()
     self:SellGreyItems()
-    MerchantFrame:Hide()
+    MBC:HideFrameIfShown(MerchantFrame)
 end
 
 function MBR:ProcessWhiteListedItems()

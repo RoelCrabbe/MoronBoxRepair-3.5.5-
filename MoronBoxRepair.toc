@@ -9,5 +9,8 @@
 Core\Main.lua
 Core\Utility.lua
 
+Locales\enUS.lua
+Locales\Initialize.lua
+
 Interface\Actions.lua
 Interface\Display.lua

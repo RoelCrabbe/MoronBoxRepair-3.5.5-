@@ -122,11 +122,11 @@ function MBR:RepairItems()
     if repairAllCost > 0 then
         if canRepair == 1 then
             RepairAllItems()
-            MBC:Print("Your items have been repaired for: "..GetCoinTextureString(repairAllCost))
+            MBC:Print(MBR:SL("Items Repaired")..GetCoinTextureString(repairAllCost))
             return
         end
 
-        MBC:Print("You don't have enough money for repairs!")
+        MBC:Print(MBR:SL("No Repair"))
     end
 end
 
@@ -217,20 +217,33 @@ function MBR:SellGreyItems()
     end
 
     if itemsSold > 0 then
-        MBC:Print("Total items sold: "..itemsSold.." ("..amountSold.." in total) for a combined price of "..GetCoinTextureString(totalPrice))
+        MBC:Print(MBR:SL("Total Items Sold", itemsSold, amountSold, GetCoinTextureString(totalPrice)))
     end
 end
 
 function MBR:OpenVendorOrBank()
     if MoronBoxRepair_Settings.VendorSettings.AutoOpenInteraction then
-        for i = 1, GetNumGossipOptions() do
-            local GossipText, GossipType = GetGossipOptions(i)
+        local hasOtherGossip = false
 
-            if GossipType == "vendor" or GossipType == "banker" or 
-                (GossipText and (GossipText:find("I want to browse") or GossipText:find("I would like to check"))) then
-                SelectGossipOption(i)
-                MBC:Print("Opening "..CapitalizeFirstLetter(GossipType).."!")
+        for i = 1, GetNumGossipOptions() do
+            local _, GossipType = GetGossipOptions(i)
+
+            if GossipType ~= "vendor" and GossipType ~= "banker" then
+                hasOtherGossip = true
                 break
+            end
+        end
+
+        if not hasOtherGossip then
+            for i = 1, GetNumGossipOptions() do
+                local GossipText, GossipType = GetGossipOptions(i)
+
+                if GossipType == "vendor" or GossipType == "banker" or 
+                    (GossipText and (GossipText:find(MBR:SL("Browse")) or GossipText:find(MBR:SL("Check")))) then
+                    SelectGossipOption(i)
+                    MBC:Print(MBR:SL("Opening")..MBR:SL(GossipType).."!")
+                    break
+                end
             end
         end
     end
