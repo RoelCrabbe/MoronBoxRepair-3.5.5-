@@ -58,7 +58,7 @@ function MBR:GeneralSettingWindow()
     AutoBlackListMatsLabel:SetText(MBC:ApplyTextColor("Auto Mats & Food & Drink Blacklisting", MBC.COLORS.Text))  
     MBC:ApplyCustomFont(AutoBlackListMatsLabel, 14)
 
-    local ResetSavedVariables = MBC:CreateButton(SettingsFrame, 150, 35, "Reset to Defaults")
+    local ResetSavedVariables = MBC:CreateButton(SettingsFrame, MBC.Button.Fit, MBC.Button.Large, "Reset to Defaults")
     ResetSavedVariables:SetPoint("CENTER", SettingsFrame, "BOTTOM", 0, 60)
 
     AutoOpenVendorCheckbox:SetScript("OnClick", function(self)
@@ -86,7 +86,8 @@ function MBR:GeneralSettingWindow()
     end)
 
     ResetSavedVariables:SetScript("OnClick", function()
-        StaticPopup_Show("CONFIRM_RESET_MBR")
+        local Message = MBC:ApplyTextColor("Are you sure", MBC.COLORS.Highlight)..MBC:ApplyTextColor(" you want to proceed and ", MBC.COLORS.Text)..MBC:ApplyTextColor("reset settings", MBC.COLORS.Highlight)..MBC:ApplyTextColor("?", MBC.COLORS.Text)
+        MBC:CustomPopup(Message, function() MBR:ResetToDefaults() end, nil)
     end)
 
     SettingsFrame.ReturnButton:SetScript("OnClick", function()
@@ -108,19 +109,6 @@ function MBR:GeneralSettingWindow()
     return SettingsFrame
 end
 
-StaticPopupDialogs["CONFIRM_RESET_MBR"] = {
-    text = "Are you sure you want to reset all settings to their default values?",
-    button1 = "Yes",
-    button2 = "No",
-    OnAccept = function()
-        MBR:ResetToDefaults()
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    preferredIndex = 3,
-}
-
 -------------------------------------------------------------------------------
 -- Confirm Frame {{{
 -------------------------------------------------------------------------------
@@ -129,9 +117,7 @@ function MBR:CreatePopOpenFrame(Parent)
     if not Parent then return end
 
     local PopOpenFrame = MBC:CreateFrame(Parent, MBC.BACKDROPS.Basic, Parent:GetWidth(), 190)
-    PopOpenFrame:SetBackdropColor(unpack(MBC.COLORS.FrameBackground))
     PopOpenFrame:SetPoint("BOTTOM", Parent, "TOP", 0, 0)
-    Parent.PopOpenFrame = PopOpenFrame
 
     local Description = PopOpenFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     Description:SetPoint("CENTER", PopOpenFrame, "CENTER", 0, 0)
@@ -210,7 +196,7 @@ function MBR:CreateSellOverview()
     local ItemHeight = MBR:SellItems(ScrollChild)
     ScrollChild:SetHeight(ItemHeight)
 
-    local ConfirmButton = MBC:CreateButton(SettingsFrame, 150, 35, "Confirm")
+    local ConfirmButton = MBC:CreateButton(SettingsFrame, MBC.Button.Fit, MBC.Button.Large, "Confirm")
     ConfirmButton:SetPoint("CENTER", SettingsFrame, "BOTTOM", 0, 60)
 
     SettingsFrame:SetScript("OnDragStop", function(self)
@@ -263,10 +249,10 @@ function MBR:SellItems(Parent)
     for Num, Item in ipairs(MBR.Session.PossibleVendorItems.WhiteListed) do
         if Item.Icon and Item.Link then
 
-            local ItemFrame = MBC:CreateFrame(Parent, MBC.BACKDROPS.Blizz_Border, Parent:GetWidth() * 0.66, 45)
+            local ItemFrame = MBC:CreateFrame(Parent, MBC.BACKDROPS.Basic, Parent:GetWidth() * 0.75, 45)
             ItemFrame:SetPoint("TOP", Parent, "TOP", 0, -Height)
 
-            local ItemIcon = MBC:CreateItemIcon(ItemFrame, Item, 37, 37)
+            local ItemIcon = MBC:CreateItemIcon(ItemFrame, Item, 40, 40)
 
             local ItemName = ItemFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
             ItemName:SetPoint("CENTER", ItemFrame, "CENTER", 0, 0)
@@ -295,7 +281,7 @@ function MBR:SellItems(Parent)
             ItemFrame.ItemName = ItemName
             ItemFrame.UnSelectButton = UnSelectButton
 
-            Height = Height + 45
+            Height = Height + 50
         end
     end
 
