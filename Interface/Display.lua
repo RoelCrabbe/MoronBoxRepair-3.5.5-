@@ -17,7 +17,7 @@ function MBR:GeneralSettingWindow()
     Description:SetText(MBR:SL("Intro"))
 
     local OffsetY = FrameHeight * 0.5 - 105
-    MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.COLORS.LineColor)
+    MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.Colors.LineColor)
 
     local AutoOpenVendorCheckbox = MBC:CreateCustomCheckbox(SettingsFrame, MoronBoxRepair_Settings.VendorSettings.AutoOpenInteraction)
     AutoOpenVendorCheckbox:SetPoint("TOPLEFT", SettingsFrame, "TOPLEFT", 45, -120)
@@ -54,7 +54,7 @@ function MBR:GeneralSettingWindow()
     local ResetSavedVariables = MBC:CreateButton(SettingsFrame, MBC.Button.Fit, MBC.Button.Large, "Reset to Defaults")
     ResetSavedVariables:SetPoint("CENTER", SettingsFrame, "BOTTOM", 0, 60)
 
-    MBC:ApplyCustomFont(Description, MBC.Font.DefaultSize)
+    MBC:ApplyCustomFont(Description, MBC.Font.InformationSize)
 
     AutoOpenVendorCheckbox:SetScript("OnClick", function(self)
         MoronBoxRepair_Settings.VendorSettings.AutoOpenInteraction = (self:GetChecked() == 1)  
@@ -108,7 +108,7 @@ end
 function MBR:CreatePopOpenFrame(Parent)
     if not Parent then return end
 
-    local PopOpenFrame = MBC:CreateFrame(Parent, MBC.BACKDROPS.Basic, Parent:GetWidth(), 190)
+    local PopOpenFrame = MBC:CreateFrame(Parent, MBC.BackDrops.Basic, Parent:GetWidth(), 190)
     PopOpenFrame:SetPoint("BOTTOM", Parent, "TOP", 0, 0)
 
     local Description = PopOpenFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -124,7 +124,7 @@ function MBR:CreatePopOpenFrame(Parent)
         self:SetPoint("BOTTOM", Parent, "TOP", 0, 0)
     end
 
-    MBC:ApplyCustomFont(Description, MBC.Font.DefaultSize)
+    MBC:ApplyCustomFont(Description, MBC.Font.InformationSize)
     MBC:HideFrameIfShown(PopOpenFrame)
 
     Parent.PopOpenFrame = PopOpenFrame
@@ -162,7 +162,7 @@ function MBR:CreateSellOverview()
     Description:SetText(MBR:SL("Icon Explanation"))
 
     local OffsetY = FrameHeight * 0.5 - 85
-    MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.COLORS.LineColor)
+    MBC:CreateLine(SettingsFrame, LineWidth, 1, 0, OffsetY, MBC.Colors.LineColor)
 
     local ItemHeight = MBR:SellItems(ScrollChild)
     ScrollChild:SetHeight(ItemHeight)
@@ -170,7 +170,7 @@ function MBR:CreateSellOverview()
     local ConfirmButton = MBC:CreateButton(SettingsFrame, MBC.Button.Fit, MBC.Button.Large, "Confirm")
     ConfirmButton:SetPoint("CENTER", SettingsFrame, "BOTTOM", 0, 60)
 
-    MBC:ApplyCustomFont(Description, MBC.Font.DefaultSize)
+    MBC:ApplyCustomFont(Description, MBC.Font.InformationSize)
 
     SettingsFrame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
@@ -220,16 +220,16 @@ function MBR:SellItems(Parent)
     for Num, Item in ipairs(MBR.Session.PossibleVendorItems.WhiteListed) do
         if Item.Icon and Item.Link then
 
-            local ItemFrame = MBC:CreateFrame(Parent, MBC.BACKDROPS.Basic, Parent:GetWidth() * 0.75, 45)
+            local ItemFrame = MBC:CreateFrame(Parent, MBC.BackDrops.Basic, Parent:GetWidth() * 0.75, 45)
             ItemFrame:SetPoint("TOP", Parent, "TOP", 0, -Height)
 
+            local UnSelectButton = MBC:ToggleButton(ItemFrame, 24, 24)
             local ItemIcon = MBC:CreateItemIcon(ItemFrame, Item, 40, 40)
             local ItemName = ItemFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
             ItemName:SetPoint("CENTER", ItemFrame, "CENTER", 0, 0)
             ItemName:SetText(Item.Name)
 
-            local UnSelectButton = MBC:ToggleButton(ItemFrame, 24, 24)
-            MBC:ApplyCustomFont(ItemName, MBC.Font.DefaultSize)
+            MBC:ApplyCustomFont(ItemName, MBC.Font.InformationSize)
 
             ItemIcon:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_LEFT")
