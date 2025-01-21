@@ -45,7 +45,14 @@ MBR.Session = {
         ["Arcane Powder"] = true,
         ["Rune of Portals"] = true,
         ["Symbol of Kings"] = true,
-        ["Symbol of Divinity"] = true
+        ["Symbol of Divinity"] = true,
+        ["Mote of Air"] = true,
+        ["Mote of Earth"] = true,
+        ["Mote of Fire"] = true,
+        ["Mote of Water"] = true,
+        ["Mote of Shadow"] = true,
+        ["Mote of Mana"] = true,
+        ["Mote of Life"] = true
     },
     ItemsToSell = {
         ["Raptor Hide"] = true,
